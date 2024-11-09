@@ -19,18 +19,27 @@ def find_icon(data, icon_name):
         return None
 
     icons = data["icons"]
+    icon_keys = list(icons.keys())
 
-    if icon_name in icons:
-        return {"name": icon_name, "id": icons[icon_name]}
-
-    closest_match = difflib.get_close_matches(icon_name, icons.keys(), n=1)
+    icon_keys_lower = [key.lower() for key in icon_keys]
     
-    if closest_match:
-        closest_name = closest_match[0]
+    icon_name_lower = icon_name.strip().lower()
+
+    # First, check if the exact icon exists
+    if icon_name_lower in icon_keys_lower:
+        icon_index = icon_keys_lower.index(icon_name_lower)
+        return {"name": icon_keys[icon_index], "id": icons[icon_keys[icon_index]]}
+
+    # Get closest matches
+    closest_matches = difflib.get_close_matches(icon_name_lower, icon_keys_lower, n=5, cutoff=0.6)
+
+    if closest_matches:
+        closest_name = closest_matches[0]  # Take the first closest match
+        icon_index = icon_keys_lower.index(closest_name)
         return {
             "requested_name": icon_name,
-            "suggested_name": closest_name,
-            "suggested_id": icons[closest_name]
+            "suggested_name": icon_keys[icon_index],
+            "suggested_id": icons[icon_keys[icon_index]]
         }
     else:
         print("No close matches found.")
